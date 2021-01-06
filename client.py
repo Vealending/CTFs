@@ -46,6 +46,7 @@ def main():
             mine_Solve = minesweeper_pb2.SolveLevelRequest(levelID=board_ID.levelID, mines=mines_Response)
             level_Response = stub.SolveLevel(mine_Solve)
             next_Game_ID = level_Response.nextLevelID
+            print("Flag:", level_Response.flag)
             return next_Game_ID
 
         def get_Surr_Squares(r, c):
@@ -102,6 +103,7 @@ def main():
 
             squares_To_Check = []
             surr_Squares = []
+            square_Value = 0
             flagged = 0
 
             for row in range(board_Info.Rows):
@@ -112,11 +114,22 @@ def main():
             for s in squares_To_Check:
                 square_Value = board_Array[s[0]][s[-1]]
                 corner_check(s[0], s[-1])
-                surr_Squares = get_Surr_Squares([s[0]][s[-1]])
+
+                surr_Squares = get_Surr_Squares(s[0],s[-1])
+                flagged = 0
+
                 for surr in surr_Squares:
-                    if board_Array[s[0]][s[-1]] == "F"
+                    if board_Array[surr[0]][surr[-1]] == "F":
                         flagged += 1
 
+                if isinstance(square_Value, int): 
+                    if int(square_Value) == flagged:
+                        print("Match!", s)
+                        for sq in surr_Squares:
+                            if board_Array[sq[0]][sq[-1]] == "#": 
+                                print("clicked something idno")
+                                tile_Click(sq[0], sq[-1])
+                                #idno
 
 
         for row in board_Array:
