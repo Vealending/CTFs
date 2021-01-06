@@ -1,5 +1,3 @@
-  GNU nano 3.2                                                                                      fibonacci.py                                                                                                 
-
 #!/usr/bin/env python3
 
 import socket
