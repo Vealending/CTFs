@@ -74,15 +74,15 @@ def main():
 
         def open_Safe():
 
-            squares_To_Check = []
             safe_Squares = []
 
             for row in range(board_Info.Rows):
                 for col in range(board_Info.Columns):
                     if board_Array[row][col] == "-":
-                        squares_To_Check = get_Surr_Squares(row, col)
-                    for s in squares_To_Check:
+                        safe_Squares = get_Surr_Squares(row, col)
+                    for s in safe_Squares:
                         tile_Click(s[0], s[-1])
+            print(safe_Squares)
 
         def corner_check(r, c):
 
@@ -90,20 +90,29 @@ def main():
             surr_Squares = get_Surr_Squares(r, c)
 
             if len(surr_Squares) == 8:
-                for s in surr_Squares:
-                    if board_Array[s[0]][s[-1]] == "-":
-                        safe_amount += 1
-                if safe_amount >= 4:
-                    for s in surr_Squares:
-                        if board_Array[s[0]][s[-1]] == "#":
-                            board_Array[s[0]][s[-1]] = "F"
-                            mines_Response.append(minesweeper_pb2.Position(row=s[0],column=s[-1]))
+                if board_Array[r - 1][c] == "-" and board_Array[r][c - 1] == "-": #top and left
+                    if not board_Array[r + 1][c + 1] == "F":
+                        board_Array[r + 1][c + 1] = "F"
+                        mines_Response.append(minesweeper_pb2.Position(row=r + 1, column=c + 1))
+                if board_Array[r - 1][c] == "-" and board_Array[r][c + 1] == "-": #top and right
+                    if not board_Array[r + 1][c - 1] == "F":
+                        board_Array[r + 1][c - 1] = "F"
+                        mines_Response.append(minesweeper_pb2.Position(row=r + 1, column=c - 1))
+                if board_Array[r + 1][c] == "-" and board_Array[r][c - 1] == "-": #bottom and left
+                    if not board_Array[r - 1][c + 1] == "F":
+                        board_Array[r - 1][c + 1] = "F"
+                        mines_Response.append(minesweeper_pb2.Position(row=r - 1, column=c + 1))
+                if board_Array[r + 1][c] == "-" and board_Array[r][c + 1] == "-": #bottom and right
+                    if not board_Array[r - 1][c - 1] == "F":
+                        board_Array[r - 1][c - 1] = "F"
+                        mines_Response.append(minesweeper_pb2.Position(row=r - 1, column=c - 1))
 
         def mine_Check():
 
             squares_To_Check = []
             surr_Squares = []
             square_Value = 0
+            unchecked = 0
             flagged = 0
 
             for row in range(board_Info.Rows):
@@ -112,40 +121,62 @@ def main():
                         squares_To_Check.append([row, col])
 
             for s in squares_To_Check:
-                square_Value = board_Array[s[0]][s[-1]]
+
                 corner_check(s[0], s[-1])
 
+                square_Value = board_Array[s[0]][s[-1]]
                 surr_Squares = get_Surr_Squares(s[0],s[-1])
+                unchecked = 0
                 flagged = 0
 
                 for surr in surr_Squares:
                     if board_Array[surr[0]][surr[-1]] == "F":
                         flagged += 1
+                    elif board_Array[surr[0]][surr[-1]] == "#":
+                        unchecked += 1
 
                 if isinstance(square_Value, int): 
-                    if int(square_Value) == flagged:
-                        print("Match!", s)
+
+                    print("-Square", s)
+                    print("Flagged:", flagged)
+                    print("Unchecked:", unchecked)
+                    print("SquareVal:", square_Value)
+
+                    if int(square_Value) <= flagged:
+                        print("Match!")
                         for sq in surr_Squares:
+                            print(sq)
                             if board_Array[sq[0]][sq[-1]] == "#": 
-                                print("clicked something idno")
                                 tile_Click(sq[0], sq[-1])
-                                #idno
-
-
-        for row in board_Array:
-            print(*row)
+                    if int(square_Value) - flagged == unchecked:
+                        print("Match!!")
+                        for s in surr_Squares:
+                            if board_Array[s[0]][s[-1]] == "#":
+                                tile_Click(s[0], s[-1])
+                    if int(square_Value) == unchecked + flagged:
+                        print("Match!!!")
+                        for s in surr_Squares:
+                            if board_Array[s[0]][s[-1]] == "#":
+                                tile_Click(s[0], s[-1])
 
         tile_Click(0,0)
-        open_Safe()
-        mine_Check()
+
+        while len(mines_Response) != mines_Amount:
+
+            print("---------------------------------")
+
+            for row in board_Array:
+                print(*row)
+
+            open_Safe()
+            mine_Check()
 
         print("---------------------------------")
 
         for row in board_Array:
             print(*row)
 
-        if len(mines_Response) == mines_Amount:
-                next_Game_ID = send_Mines()
+        next_Game_ID = send_Mines()
 
 if __name__ == '__main__':
         main()
