@@ -1,8 +1,8 @@
 from pathlib import Path
 import csv
 
-rootPath ='C:\\imghost\\'
 importFile = 'C:\\session.csv'
+rootPath ='C:\\imghost\\galleries\\'
 uids = list()
 
 with open(importFile) as f:

@@ -136,7 +136,7 @@ def main():
                                 print("clicked something idno")
                                 tile_Click(sq[0], sq[-1])
                                 #idno
-                    elif int(square_Value) == flagged + unknown
+                    elif int(square_Value) == flagged + unknown:
                         print("Match!", s)
                         print(surr_Squares)
                         for sq in surr_Squares:
