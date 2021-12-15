@@ -2,104 +2,126 @@ from array import *
 import requests, time, random
 
 ENDPOINT = "http://guessing-game:80"
-values_to_guess = [[64, 6, 0], [128, 11, 1], [2048, 15, 1], [10000, 250, 2]]
+#values_to_guess = [[64, 6, 0], [128, 11, 1], [2048, 15, 1], [10000, 250, 2]]
+values_to_guess = [[128, 11, 1]]
 
 def solver():
-    for i in range(4):
-        n, m, k = values_to_guess[i]
+    for i in range(50):
+        n, m, k = values_to_guess[0]
         no_answer = True
         
         while no_answer:
-            print(i)
-            print(m)
             asked = 0 
             lies = 0
             
             game_id = start_game(n, m, k)
-            print("Game ID:", str(game_id))
-            
             full_range = list(range(1, n + 1))
             
             for j in range(m):
                 
-                answer = "A"
                 lower_range = full_range[:len(full_range)//2]
                 upper_range = full_range[len(full_range)//2:]
+                answer = "A"
                 
                 if k != 0: #can lie
-                    if j == 0: #can lie and is first
-                    
-                        question = full_range
-                    
-                        while not isinstance(answer, bool):  
-                            answer = ask_question(game_id, question)
-                        
-                        asked += 1
-                        if answer == False:
-                            print("Lie!!! full false")
-                            k -= 1
-                            
-                    else: #can lie and not first
-                    
+                    if not j % 2: # 1, 3, 5
+                        #ask once and save
                         question = lower_range
-                        
-                        while not isinstance(answer, bool):  
-                            answer = ask_question(game_id, question)
-                            answer_lower = answer
-                        
+                     
+                        answer = ask_question(game_id, question)
                         asked += 1
-                        answer = "A"
-                        question = upper_range
-                        
-                        while not isinstance(answer, bool):  
-                            answer = ask_question(game_id, question)
-                            answer_upper = answer
-                        asked += 1
-                        
-                        if answer_upper and answer_lower:
-                            print("Lie!!!!!! both true")
-                            k -= 1
-                        elif answer_upper:
-                            full_range = upper_range
-                        elif answer_lower:
+
+                        if answer:
+                            print("lower")
                             full_range = lower_range
-                        
+                        else:
+                            print("upper")
+                            full_range = upper_range
+
+                        temp_full_range = full_range
+                        print(temp_full_range)
+
+                    else: # 2, 4, 6 
+                        #ask twice and check for lies
+                        answer_lower = "A"
+                        answer_upper = "A"
+                        answer = "A"
+
+                        question = lower_range
+                    
+                        answer_lower = ask_question(game_id, question)
+                        asked += 1
+
+                        question = upper_range
+                        answer = "A"
+
+                        answer_upper = ask_question(game_id, question)
+                        asked += 1
+
+                        if answer_lower == True and answer_upper == True:
+                            print("both true!!")
+                            k -= 1
+                            question = lower_range
+                            answer = ask_question(game_id, question)
+                            asked += 1
+                            if answer:
+                                full_range = lower_range
+                            else:
+                                full_range = upper_range
+                        elif answer_lower == False and answer_upper == False:
+                            print("both false!!!")
+                            k -= 1
+                            question = lower_range
+                            answer = ask_question(game_id, question)
+                            asked += 1
+                            if answer:
+                                full_range = lower_range
+                            else:
+                                full_range = upper_range
+                        elif answer_lower == True and answer_upper == False:
+                            print("lower mod")
+                            full_range = lower_range
+                        elif answer_lower == False and answer_upper == True:
+                            print("upper mod")
+                            full_range = upper_range
+
+                        print("Answers: ", end='')
+                        print(answer_lower, answer_upper)
+
                 else: #cannot lie
                 
                     question = lower_range
                     
-                    while not isinstance(answer, bool):  
-                        answer = ask_question(game_id, question)
+                    answer = ask_question(game_id, question)
                     
                     asked += 1
                     
-                    if answer == True:
-                        print(True)
+                    if answer:
                         full_range = lower_range
                     else:
-                        print(False)
                         full_range = upper_range
-                    
-                #print("Query:", str(query(game_id)))
                 
-                print(asked, m)
+                print("Status: ", end='')
+                print(j, len(full_range), asked, m, k)
+                #print("Query:", str(query(game_id)))
                 
                 if asked == m:
                     print("Successfully exhausted level", str(i))
-                    
-                    rng = random.randint(1,len(full_range))
-                    guess = full_range[rng - 1]
+                    #print("Query:", str(query(game_id)))
+                    print(full_range)
                     v = "A"
-                    print("Guess:", str(guess))
+                    print("Guess:", full_range[0])
                     
-                    while not isinstance(v, bool):  
-                        v = verify_guess(game_id, full_range[rng - 1])
+                    v = verify_guess(game_id, full_range[0])
                         
                     if v:
                         no_answer = False
-                        break
-                    
-                    print("Finished with asking. Now what")
+
+                    break
+            else:
+                continue
+            break
+
 	
 def ask_question(game_id, question):
     response = requests.post(f"{ENDPOINT}/ask_question", json={"game_id": game_id, "question": question})
