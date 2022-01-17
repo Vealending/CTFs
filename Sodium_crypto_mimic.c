@@ -1,3 +1,5 @@
+/* want me to logon with ssh? sure let me just fire up visual studio first */
+
 #include <sodium.h>
 
 __int64 __fastcall bin2hex_length(__int64 a1);
