@@ -35,7 +35,7 @@ for galUrl in galleryUrls: # loops through all galleries in the csv0
     for tag in driver.find_elements_by_class_name('tc'): # finds the tags
         info_structured[tag.text[:-1]] = [] # sets the dictionary key as blank
         for t in tag.find_elements_by_xpath("..//a[starts-with(@id, 'ta_')]"): # finds all id's starting with ta_ one step up
-            info_structured[tag.text[:-1]].append(t.text) #adds tag text as values to dictionary key
+            info_structured[tag.text[:-1]].append(t.text) # adds tag text as values to dictionary key
             
     if not Path(rootPath + uid).is_dir():
         Path(rootPath + uid).mkdir(exist_ok=True)
